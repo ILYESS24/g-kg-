@@ -62,15 +62,59 @@
         #section3 { background: #10b981; } /* VERT */
         #section4 { background: #f59e0b; } /* ORANGE */
         #section5 { background: #8b5cf6; } /* VIOLET */
+
+        .indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="section1" class="section">SECTION 1 - ROUGE</div>
-        <div id="section2" class="section">SECTION 2 - BLEU</div>
-        <div id="section3" class="section">SECTION 3 - VERT</div>
-        <div id="section4" class="section">SECTION 4 - ORANGE</div>
-        <div id="section5" class="section">SECTION 5 - VIOLET</div>
+        <div id="section1" class="section active">
+            <div>
+                <h2>SECTION 1 - ROUGE</h2>
+                <p>⭐ ACTIVE - Je suis au-dessus !</p>
+                <p>Scroll vers le bas pour voir la bleue arriver par-dessus</p>
+            </div>
+        </div>
+        <div id="section2" class="section next">
+            <div>
+                <h2>SECTION 2 - BLEU</h2>
+                <p>⬆️ Je vais arriver par-dessus la rouge !</p>
+                <p>Scroll vers le haut pour revenir</p>
+            </div>
+        </div>
+        <div id="section3" class="section">
+            <div>
+                <h2>SECTION 3 - VERT</h2>
+                <p>Continue à scroller !</p>
+            </div>
+        </div>
+        <div id="section4" class="section">
+            <div>
+                <h2>SECTION 4 - ORANGE</h2>
+                <p>Presque fini !</p>
+            </div>
+        </div>
+        <div id="section5" class="section">
+            <div>
+                <h2>SECTION 5 - VIOLET</h2>
+                <p>Terminé ! Scroll vers le haut</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="indicator" id="indicator">
+        Slide actif: 1<br>
+        Effet: Push (superposition)
     </div>
 
     <script>
@@ -85,18 +129,31 @@
 
         function updateSlides() {
             const sections = document.querySelectorAll('.section');
+            const indicator = document.getElementById('indicator');
 
             sections.forEach((section, index) => {
-                // Toutes les sections sont à translateY(0) mais avec des z-index différents
+                // EFFET PUSH : toutes les sections sont superposées à translateY(0)
                 section.style.transform = 'translateY(0)';
-                section.style.zIndex = (totalSlides - Math.abs(index - currentSlide)).toString();
+                section.style.zIndex = '5'; // Z-index de base
+
+                // La section actuelle a le z-index le plus élevé
+                if (index === currentSlide) {
+                    section.style.zIndex = '15';
+                    console.log('⭐ Section', index + 1, 'est ACTIVE (z-index: 15)');
+                } else {
+                    console.log('⬇️ Section', index + 1, 'est en dessous (z-index: 5)');
+                }
             });
 
-            console.log('📄 Slide active:', currentSlide + 1, '- Z-index:', totalSlides - currentSlide);
-        }
+            // Mettre à jour l'indicateur
+            indicator.innerHTML = `
+                Slide actif: ${currentSlide + 1}<br>
+                Effet: Push (superposition)<br>
+                Z-index actif: 15
+            `;
 
-        // Initialisation
-        updateSlides();
+            console.log('🎯 SLIDE ACTIVE:', currentSlide + 1, '- Toutes les autres sont dessous !');
+        }
 
         function nextSlide() {
             if (currentSlide < totalSlides - 1) {
