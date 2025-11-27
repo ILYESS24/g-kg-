@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Section {
   id: string;
@@ -15,22 +15,49 @@ interface VerticalCarouselProps {
 
 export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let scrollAccumulator = 0;
+    const scrollThreshold = 100; // Seuil pour déclencher le changement
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
+
+      if (isTransitioning) return;
+
+      scrollAccumulator += e.deltaY;
+
+      // Si on dépasse le seuil vers le bas
+      if (scrollAccumulator > scrollThreshold && currentIndex < sections.length - 1) {
+        setIsTransitioning(true);
         setCurrentIndex(prev => prev + 1);
-      } else if (e.deltaY < 0 && currentIndex > 0) {
+        scrollAccumulator = 0;
+
+        setTimeout(() => setIsTransitioning(false), 1000);
+      }
+      // Si on dépasse le seuil vers le haut
+      else if (scrollAccumulator < -scrollThreshold && currentIndex > 0) {
+        setIsTransitioning(true);
         setCurrentIndex(prev => prev - 1);
+        scrollAccumulator = 0;
+
+        setTimeout(() => setIsTransitioning(false), 1000);
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isTransitioning) return;
+
       if (e.key === 'ArrowDown' && currentIndex < sections.length - 1) {
+        setIsTransitioning(true);
         setCurrentIndex(prev => prev + 1);
+        setTimeout(() => setIsTransitioning(false), 1000);
       } else if (e.key === 'ArrowUp' && currentIndex > 0) {
+        setIsTransitioning(true);
         setCurrentIndex(prev => prev - 1);
+        setTimeout(() => setIsTransitioning(false), 1000);
       }
     };
 
@@ -41,23 +68,52 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentIndex, sections.length]);
+  }, [currentIndex, sections.length, isTransitioning]);
 
   return (
-    <div className="relative h-screen overflow-hidden">
-      {/* Sections */}
-      <div
-        className="transition-transform duration-700 ease-in-out"
-        style={{
-          transform: `translateY(-${currentIndex * 100}vh)`
-        }}
-      >
-        {sections.map((section, index) => (
+    <div ref={containerRef} className="relative h-screen overflow-hidden">
+      {/* Sections avec effet de superposition */}
+      {sections.map((section, index) => {
+        const isActive = index === currentIndex;
+        const isPrev = index === currentIndex - 1;
+        const isNext = index === currentIndex + 1;
+
+        let transform = '';
+        let zIndex = 0;
+        let opacity = 0;
+
+        if (isActive) {
+          transform = 'translateY(0) scale(1)';
+          zIndex = 10;
+          opacity = 1;
+        } else if (isPrev) {
+          transform = 'translateY(-20vh) scale(0.95)';
+          zIndex = 5;
+          opacity = 0.7;
+        } else if (isNext) {
+          transform = 'translateY(20vh) scale(0.95)';
+          zIndex = 5;
+          opacity = 0.7;
+        } else if (index < currentIndex) {
+          transform = `translateY(-${(currentIndex - index) * 40}vh) scale(${1 - (currentIndex - index) * 0.1})`;
+          zIndex = Math.max(1, 10 - (currentIndex - index));
+          opacity = Math.max(0.3, 1 - (currentIndex - index) * 0.3);
+        } else {
+          transform = `translateY(${(index - currentIndex) * 40}vh) scale(${1 - (index - currentIndex) * 0.1})`;
+          zIndex = Math.max(1, 10 - (index - currentIndex));
+          opacity = Math.max(0.3, 1 - (index - currentIndex) * 0.3);
+        }
+
+        return (
           <div
             key={section.id}
-            className="h-screen flex items-center justify-center relative"
+            className="absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out"
             style={{
-              backgroundColor: section.backgroundColor || '#ffffff'
+              backgroundColor: section.backgroundColor || '#ffffff',
+              transform,
+              zIndex,
+              opacity,
+              filter: isActive ? 'none' : 'blur(2px)',
             }}
           >
             {/* Contenu de la section */}
@@ -75,7 +131,13 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
               {sections.map((_, sectionIndex) => (
                 <button
                   key={sectionIndex}
-                  onClick={() => setCurrentIndex(sectionIndex)}
+                  onClick={() => {
+                    if (!isTransitioning) {
+                      setIsTransitioning(true);
+                      setCurrentIndex(sectionIndex);
+                      setTimeout(() => setIsTransitioning(false), 1000);
+                    }
+                  }}
                   className={`block w-3 h-3 rounded-full mb-2 transition-all duration-300 ${
                     sectionIndex === currentIndex
                       ? 'bg-black scale-125'
@@ -86,14 +148,20 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
               ))}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       {/* Navigation arrows */}
       {currentIndex > 0 && (
         <button
-          onClick={() => setCurrentIndex(prev => prev - 1)}
-          className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10"
+          onClick={() => {
+            if (!isTransitioning) {
+              setIsTransitioning(true);
+              setCurrentIndex(prev => prev - 1);
+              setTimeout(() => setIsTransitioning(false), 1000);
+            }
+          }}
+          className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-20"
           aria-label="Section précédente"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -104,8 +172,14 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
 
       {currentIndex < sections.length - 1 && (
         <button
-          onClick={() => setCurrentIndex(prev => prev + 1)}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-10"
+          onClick={() => {
+            if (!isTransitioning) {
+              setIsTransitioning(true);
+              setCurrentIndex(prev => prev + 1);
+              setTimeout(() => setIsTransitioning(false), 1000);
+            }
+          }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-20"
           aria-label="Section suivante"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -115,8 +189,13 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
       )}
 
       {/* Indicateur de progression */}
-      <div className="absolute bottom-8 right-8 text-white bg-black bg-opacity-50 px-4 py-2 rounded-full">
+      <div className="absolute bottom-8 right-8 text-white bg-black bg-opacity-50 px-4 py-2 rounded-full z-20">
         {currentIndex + 1} / {sections.length}
+      </div>
+
+      {/* Overlay pour l'effet de profondeur */}
+      <div className="absolute inset-0 pointer-events-none z-15">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black opacity-10"></div>
       </div>
     </div>
   );
