@@ -37,20 +37,7 @@
             transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        .section.active {
-            transform: translateY(0);
-            z-index: 10;
-        }
-
-        .section.next {
-            transform: translateY(100vh);
-            z-index: 5;
-        }
-
-        .section.prev {
-            transform: translateY(-100vh);
-            z-index: 5;
-        }
+        /* Les positions sont contrôlées par JavaScript avec translateY */
 
         .section.hidden {
             transform: translateY(100vh);
@@ -81,40 +68,42 @@
         <div id="section1" class="section active">
             <div>
                 <h2>SECTION 1 - ROUGE</h2>
-                <p>⭐ ACTIVE - Je suis au-dessus !</p>
-                <p>Scroll vers le bas pour voir la bleue arriver par-dessus</p>
+                <p>⭐ ACTIVE - Je suis visible maintenant</p>
+                <p>Scroll vers le bas pour voir la bleue monter</p>
+                <p>⬇️ La rouge va descendre, la bleue va monter</p>
             </div>
         </div>
         <div id="section2" class="section next">
             <div>
                 <h2>SECTION 2 - BLEU</h2>
-                <p>⬆️ Je vais arriver par-dessus la rouge !</p>
-                <p>Scroll vers le haut pour revenir</p>
+                <p>Je suis prête à monter !</p>
+                <p>⬆️ Scroll vers le haut pour me voir descendre</p>
             </div>
         </div>
         <div id="section3" class="section">
             <div>
                 <h2>SECTION 3 - VERT</h2>
-                <p>Continue à scroller !</p>
+                <p>J'attends mon tour !</p>
             </div>
         </div>
         <div id="section4" class="section">
             <div>
                 <h2>SECTION 4 - ORANGE</h2>
-                <p>Presque fini !</p>
+                <p>Continue à scroller</p>
             </div>
         </div>
         <div id="section5" class="section">
             <div>
                 <h2>SECTION 5 - VIOLET</h2>
-                <p>Terminé ! Scroll vers le haut</p>
+                <p>Dernière section !</p>
             </div>
         </div>
     </div>
 
     <div class="indicator" id="indicator">
-        Slide actif: 1<br>
-        Effet: Push (superposition)
+        Slide actif: 1/5<br>
+        Effet: Carrousel Vertical<br>
+        Position: translateY(0vh)
     </div>
 
     <script>
@@ -132,54 +121,47 @@
             const indicator = document.getElementById('indicator');
 
             sections.forEach((section, index) => {
-                // EFFET PUSH : toutes les sections sont superposées à translateY(0)
-                section.style.transform = 'translateY(0)';
-                section.style.zIndex = '5'; // Z-index de base
+                // CARROUSEL VERTICAL : chaque section se positionne relativement
+                const relativePosition = index - currentSlide;
+                const translateY = relativePosition * 100; // 100vh = une hauteur d'écran
 
-                // La section actuelle a le z-index le plus élevé
-                if (index === currentSlide) {
-                    section.style.zIndex = '15';
-                    console.log('⭐ Section', index + 1, 'est ACTIVE (z-index: 15)');
-                } else {
-                    console.log('⬇️ Section', index + 1, 'est en dessous (z-index: 5)');
-                }
+                section.style.transform = `translateY(${translateY}vh)`;
+                section.style.zIndex = '10'; // Tous au même niveau
+
+                console.log(`Section ${index + 1}: translateY(${translateY}vh)`);
             });
 
             // Mettre à jour l'indicateur
             indicator.innerHTML = `
-                Slide actif: ${currentSlide + 1}<br>
-                Effet: Push (superposition)<br>
-                Z-index actif: 15
+                Slide actif: ${currentSlide + 1}/${totalSlides}<br>
+                Effet: Carrousel Vertical<br>
+                Position: translateY(0vh)
             `;
 
-            console.log('🎯 SLIDE ACTIVE:', currentSlide + 1, '- Toutes les autres sont dessous !');
+            console.log('🎯 SLIDE ACTIVE:', currentSlide + 1, '- Positionnée à translateY(0vh)');
         }
 
-        function nextSlide() {
-            if (currentSlide < totalSlides - 1) {
-                currentSlide++;
-                updateSlides();
-            }
-        }
 
-        function prevSlide() {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateSlides();
-            }
-        }
-
-        // EFFET PUSH ORIGINAL : page actuelle reste fixe, nouvelle arrive par-dessus
+        // CARROUSEL VERTICAL CLASSIQUE : sections se déplacent les unes par rapport aux autres
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            // Scroll vers le bas = nouvelle section arrive par le bas
-            if (e.deltaY > 20 && currentSlide < totalSlides - 1) {
-                nextSlide();
+            const now = Date.now();
+            if (now - lastScrollTime < 100) return; // Anti-spam
+
+            // Scroll vers le bas = descendre d'une section
+            if (e.deltaY > 30 && currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlides();
+                lastScrollTime = now;
+                console.log('⬇️ Descendu à la section', currentSlide + 1);
             }
-            // Scroll vers le haut = nouvelle section arrive par le haut
-            else if (e.deltaY < -20 && currentSlide > 0) {
-                prevSlide();
+            // Scroll vers le haut = monter d'une section
+            else if (e.deltaY < -30 && currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+                lastScrollTime = now;
+                console.log('⬆️ Monté à la section', currentSlide + 1);
             }
         }, { passive: false });
 
