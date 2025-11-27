@@ -66,153 +66,66 @@
 </head>
 <body>
     <div class="container">
-        <div id="section1" class="section active">SECTION 1 - ROUGE</div>
-        <div id="section2" class="section next">SECTION 2 - BLEU</div>
-        <div id="section3" class="section hidden">SECTION 3 - VERT</div>
-        <div id="section4" class="section hidden">SECTION 4 - ORANGE</div>
-        <div id="section5" class="section hidden">SECTION 5 - VIOLET</div>
+        <div id="section1" class="section">SECTION 1 - ROUGE</div>
+        <div id="section2" class="section">SECTION 2 - BLEU</div>
+        <div id="section3" class="section">SECTION 3 - VERT</div>
+        <div id="section4" class="section">SECTION 4 - ORANGE</div>
+        <div id="section5" class="section">SECTION 5 - VIOLET</div>
     </div>
 
     <script>
         let currentSlide = 0;
         const totalSlides = 5;
-        let isTransitioning = false;
-        let scrollAccumulator = 0;
-        const scrollThreshold = 30;
         let lastScrollTime = 0;
-        let transitionProgress = 0; // Progression de la transition (0-1)
-        const transitionSpeed = 0.02; // Vitesse de révélation progressive
 
         console.log('🚀 CARROUSEL FINAL CHARGÉ');
 
         // Initialisation
-        resetSlidePositions();
+        updateSlides();
 
         function updateSlides() {
             const sections = document.querySelectorAll('.section');
 
             sections.forEach((section, index) => {
-                section.classList.remove('active', 'next', 'prev', 'hidden');
-
-                if (index === currentSlide) {
-                    section.classList.add('active');
-                } else if (index === currentSlide + 1) {
-                    section.classList.add('next');
-                } else if (index === currentSlide - 1) {
-                    section.classList.add('prev');
-                } else {
-                    section.classList.add('hidden');
-                }
+                // Toutes les sections sont à translateY(0) mais avec des z-index différents
+                section.style.transform = 'translateY(0)';
+                section.style.zIndex = (totalSlides - Math.abs(index - currentSlide)).toString();
             });
 
-            console.log('📄 Slide affichée:', currentSlide + 1, '- Next:', currentSlide + 2, '- Prev:', currentSlide);
+            console.log('📄 Slide active:', currentSlide + 1, '- Z-index:', totalSlides - currentSlide);
         }
 
+        // Initialisation
+        updateSlides();
+
         function nextSlide() {
-            // Pour la compatibilité avec les touches, on garde un nextSlide instantané
-            if (currentSlide < totalSlides - 1 && !isTransitioning) {
-                isTransitioning = true;
+            if (currentSlide < totalSlides - 1) {
                 currentSlide++;
-                scrollAccumulator = 0;
-                transitionProgress = 0;
                 updateSlides();
-                setTimeout(() => isTransitioning = false, 600);
             }
         }
 
         function prevSlide() {
-            // Pour la compatibilité avec les touches, on garde un prevSlide instantané
-            if (currentSlide > 0 && !isTransitioning) {
-                isTransitioning = true;
+            if (currentSlide > 0) {
                 currentSlide--;
-                scrollAccumulator = 0;
-                transitionProgress = 0;
                 updateSlides();
-                setTimeout(() => isTransitioning = false, 600);
             }
         }
 
-        // SCROLL progressif - révélation petit à petit
+        // EFFET PUSH ORIGINAL : page actuelle reste fixe, nouvelle arrive par-dessus
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            // Accumuler le scroll pour un mouvement fluide
-            scrollAccumulator += e.deltaY * 0.3; // Sensibilité douce
-
-            // Limiter l'accumulateur pour éviter les valeurs trop grandes
-            scrollAccumulator = Math.max(-200, Math.min(200, scrollAccumulator));
-
-            // Calculer la progression de la transition
-            if (scrollAccumulator > scrollThreshold && currentSlide < totalSlides - 1) {
-                // Transition vers la slide suivante
-                const progress = Math.min(1, (scrollAccumulator - scrollThreshold) / 150);
-                updateSlidePositions(progress, 'next');
-            } else if (scrollAccumulator < -scrollThreshold && currentSlide > 0) {
-                // Transition vers la slide précédente
-                const progress = Math.min(1, (-scrollAccumulator - scrollThreshold) / 150);
-                updateSlidePositions(progress, 'prev');
-            } else if (Math.abs(scrollAccumulator) <= scrollThreshold) {
-                // Reset si on revient dans la zone neutre
-                resetSlidePositions();
+            // Scroll vers le bas = nouvelle section arrive par le bas
+            if (e.deltaY > 20 && currentSlide < totalSlides - 1) {
+                nextSlide();
             }
-
-            // Changer de slide si la transition est complète
-            if (scrollAccumulator > scrollThreshold + 150 && currentSlide < totalSlides - 1) {
-                currentSlide++;
-                scrollAccumulator = 0;
-                updateSlides();
-                console.log('Slide changed to:', currentSlide);
-            } else if (scrollAccumulator < -scrollThreshold - 150 && currentSlide > 0) {
-                currentSlide--;
-                scrollAccumulator = 0;
-                updateSlides();
-                console.log('Slide changed to:', currentSlide);
+            // Scroll vers le haut = nouvelle section arrive par le haut
+            else if (e.deltaY < -20 && currentSlide > 0) {
+                prevSlide();
             }
         }, { passive: false });
 
-        function updateSlidePositions(progress, direction) {
-            const sections = document.querySelectorAll('.section');
-
-            sections.forEach((section, index) => {
-                if (direction === 'next' && index === currentSlide) {
-                    // Slide actuelle : se déplace vers le haut
-                    const translateY = -progress * 100;
-                    section.style.transform = `translateY(${translateY}vh)`;
-                    section.style.zIndex = '10';
-                } else if (direction === 'next' && index === currentSlide + 1) {
-                    // Slide suivante : arrive depuis le bas
-                    const translateY = (1 - progress) * 100;
-                    section.style.transform = `translateY(${translateY}vh)`;
-                    section.style.zIndex = '15';
-                } else if (direction === 'prev' && index === currentSlide) {
-                    // Slide actuelle : se déplace vers le bas
-                    const translateY = progress * 100;
-                    section.style.transform = `translateY(${translateY}vh)`;
-                    section.style.zIndex = '10';
-                } else if (direction === 'prev' && index === currentSlide - 1) {
-                    // Slide précédente : arrive depuis le haut
-                    const translateY = -(1 - progress) * 100;
-                    section.style.transform = `translateY(${translateY}vh)`;
-                    section.style.zIndex = '15';
-                }
-            });
-        }
-
-        function resetSlidePositions() {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach((section, index) => {
-                if (index === currentSlide) {
-                    section.style.transform = 'translateY(0)';
-                    section.style.zIndex = '10';
-                } else if (index === currentSlide + 1) {
-                    section.style.transform = 'translateY(100vh)';
-                    section.style.zIndex = '5';
-                } else {
-                    section.style.transform = 'translateY(100vh)';
-                    section.style.zIndex = '1';
-                }
-            });
-        }
 
         // CLAVIER
         document.addEventListener('keydown', (e) => {
