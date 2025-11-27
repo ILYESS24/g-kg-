@@ -231,7 +231,7 @@
 </head>
 <body>
     <div class="page-container">
-        <div class="inner-page">
+        <div class="inner-page" style="background-color: transparent;">
             <div class="carousel-container">
                 <!-- Section 1: Hero -->
                 <div class="section active">
@@ -443,8 +443,15 @@
             }
         }, { passive: false });
 
-        // Debug log pour vérifier que le script fonctionne
-        console.log('Carrousel vertical initialisé avec', totalSlides, 'sections');
+        // Debug logs pour vérifier que tout fonctionne
+        console.log('🚀 Carrousel vertical initialisé avec', totalSlides, 'sections');
+        console.log('📄 Sections trouvées:', document.querySelectorAll('.section').length);
+        console.log('🎯 Indicateurs trouvés:', indicators.length);
+
+        // Test du scroll
+        document.addEventListener('wheel', (e) => {
+            console.log('🖱️ Scroll détecté:', e.deltaY);
+        }, { passive: false });
     </script>
 </body>
 </html>

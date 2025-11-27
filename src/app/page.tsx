@@ -83,14 +83,14 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#000000', // Noir complet
+      backgroundColor: '#000000', // Bordures noires épaisses
       padding: '20px',
       boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
-        backgroundColor: 'white',
+        backgroundColor: 'transparent', // Laisser voir les couleurs des sections
         borderRadius: '24px',
         overflow: 'hidden',
         minHeight: 'calc(100vh - 40px)'

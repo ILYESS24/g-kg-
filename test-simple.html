@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Scroll Simple</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #000000; /* Bordures noires épaisses */
+            box-sizing: border-box;
+        }
+
+        .page {
+            height: calc(100vh - 40px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        #page1 { background: #ef4444; } /* Rouge */
+        #page2 { background: #3b82f6; } /* Bleu */
+        #page3 { background: #10b981; } /* Vert */
+        #page4 { background: #f59e0b; } /* Orange */
+        #page5 { background: #8b5cf6; } /* Violet */
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="page1" class="page">PAGE 1 - ROUGE<br><small>Scroll vers le bas</small></div>
+    <div id="page2" class="page hidden">PAGE 2 - BLEU<br><small>Scroll pour continuer</small></div>
+    <div id="page3" class="page hidden">PAGE 3 - VERT<br><small>Scroll pour continuer</small></div>
+    <div id="page4" class="page hidden">PAGE 4 - ORANGE<br><small>Scroll pour continuer</small></div>
+    <div id="page5" class="page hidden">PAGE 5 - VIOLET<br><small>Scroll vers le haut</small></div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 5;
+        let scrollAccumulator = 0;
+        const scrollThreshold = 50;
+
+        console.log('🎯 Test simple de scroll initialisé');
+
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            console.log('🖱️ Scroll détecté:', e.deltaY);
+
+            scrollAccumulator += e.deltaY;
+
+            if (scrollAccumulator > scrollThreshold && currentPage < totalPages) {
+                console.log('⬇️ Changement vers page', currentPage + 1);
+                changePage(currentPage + 1);
+                scrollAccumulator = 0;
+            } else if (scrollAccumulator < -scrollThreshold && currentPage > 1) {
+                console.log('⬆️ Changement vers page', currentPage - 1);
+                changePage(currentPage - 1);
+                scrollAccumulator = 0;
+            }
+        }, { passive: false });
+
+        function changePage(newPage) {
+            // Masquer toutes les pages
+            for (let i = 1; i <= totalPages; i++) {
+                document.getElementById('page' + i).classList.add('hidden');
+            }
+
+            // Afficher la nouvelle page
+            document.getElementById('page' + newPage).classList.remove('hidden');
+            currentPage = newPage;
+
+            console.log('📄 Page affichée:', newPage);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' && currentPage < totalPages) {
+                changePage(currentPage + 1);
+            } else if (e.key === 'ArrowUp' && currentPage > 1) {
+                changePage(currentPage - 1);
+            }
+        });
+
+        console.log('✅ Script chargé - Essaie de scroller !');
+    </script>
+</body>
+</html>
