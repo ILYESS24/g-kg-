@@ -68,16 +68,16 @@
         <div id="section1" class="section active">
             <div>
                 <h2>SECTION 1 - ROUGE</h2>
-                <p>⭐ ACTIVE - Je suis visible maintenant</p>
-                <p>Scroll vers le bas pour voir la bleue monter</p>
-                <p>⬇️ La rouge va descendre, la bleue va monter</p>
+                <p>⭐ JE SUIS LA PLUS HAUTE (z-index: 20)</p>
+                <p>JE NE BOUGE JAMAIS DE PLACE !</p>
+                <p>Scroll vers le bas → BLEUE viendra par-dessus MOI</p>
             </div>
         </div>
         <div id="section2" class="section next">
             <div>
                 <h2>SECTION 2 - BLEU</h2>
-                <p>Je suis prête à monter !</p>
-                <p>⬆️ Scroll vers le haut pour me voir descendre</p>
+                <p>🔵 MOI je vais devenir la plus haute !</p>
+                <p>Scroll vers le haut → ROUGE redeviendra la plus haute</p>
             </div>
         </div>
         <div id="section3" class="section">
@@ -120,48 +120,45 @@
             const sections = document.querySelectorAll('.section');
             const indicator = document.getElementById('indicator');
 
+            // EFFET PUSH SIMPLE : toutes les sections restent à leur place
+            // Seule la section active change de z-index pour passer au-dessus
+
             sections.forEach((section, index) => {
-                // CARROUSEL VERTICAL : chaque section se positionne relativement
-                const relativePosition = index - currentSlide;
-                const translateY = relativePosition * 100; // 100vh = une hauteur d'écran
-
-                section.style.transform = `translateY(${translateY}vh)`;
-                section.style.zIndex = '10'; // Tous au même niveau
-
-                console.log(`Section ${index + 1}: translateY(${translateY}vh)`);
+                section.style.transform = 'translateY(0)'; // TOUTES restent à translateY(0)
+                section.style.zIndex = (totalSlides - index).toString(); // Z-index basé sur l'ordre
             });
 
+            // La section actuelle a le z-index LE PLUS ÉLEVÉ
+            const activeSection = document.getElementById('section' + (currentSlide + 1));
+            activeSection.style.zIndex = '20'; // AU-DESSUS de tout
+
             // Mettre à jour l'indicateur
+            const colors = ['🔴 ROUGE', '🔵 BLEU', '🟢 VERT', '🟠 ORANGE', '🟣 VIOLET'];
             indicator.innerHTML = `
-                Slide actif: ${currentSlide + 1}/${totalSlides}<br>
-                Effet: Carrousel Vertical<br>
-                Position: translateY(0vh)
+                Slide actif: ${currentSlide + 1}<br>
+                Couleur: ${colors[currentSlide]}<br>
+                Z-index: 20 (au-dessus)
             `;
 
-            console.log('🎯 SLIDE ACTIVE:', currentSlide + 1, '- Positionnée à translateY(0vh)');
+            console.log(`🎯 ${colors[currentSlide]} est maintenant AU-DESSUS de toutes les autres !`);
         }
 
 
-        // CARROUSEL VERTICAL CLASSIQUE : sections se déplacent les unes par rapport aux autres
+        // EFFET PUSH : page rouge reste fixe, bleue arrive par-dessus
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            const now = Date.now();
-            if (now - lastScrollTime < 100) return; // Anti-spam
-
-            // Scroll vers le bas = descendre d'une section
-            if (e.deltaY > 30 && currentSlide < totalSlides - 1) {
+            // Scroll vers le bas = bleue arrive par-dessus rouge
+            if (e.deltaY > 20 && currentSlide < totalSlides - 1) {
                 currentSlide++;
                 updateSlides();
-                lastScrollTime = now;
-                console.log('⬇️ Descendu à la section', currentSlide + 1);
+                console.log('🔵 BLEUE arrive par-dessus ROUGE');
             }
-            // Scroll vers le haut = monter d'une section
-            else if (e.deltaY < -30 && currentSlide > 0) {
+            // Scroll vers le haut = rouge revient par-dessus bleue
+            else if (e.deltaY < -20 && currentSlide > 0) {
                 currentSlide--;
                 updateSlides();
-                lastScrollTime = now;
-                console.log('⬆️ Monté à la section', currentSlide + 1);
+                console.log('🔴 ROUGE revient par-dessus BLEUE');
             }
         }, { passive: false });
 

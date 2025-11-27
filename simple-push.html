@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFFET PUSH - ROUGE FIXE, BLEUE ARRIVE</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            height: calc(100vh - 40px);
+            background: transparent;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: z-index 0.3s ease;
+        }
+
+        #rouge { background: #ef4444; z-index: 10; }
+        #bleu { background: #3b82f6; z-index: 5; }
+
+        .debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="rouge" class="section">
+            <div>
+                <h1>🔴 SECTION ROUGE</h1>
+                <p>JE RESTE FIXE TOUJOURS !</p>
+                <p>Scroll vers le bas pour voir BLEUE arriver</p>
+            </div>
+        </div>
+
+        <div id="bleu" class="section">
+            <div>
+                <h1>🔵 SECTION BLEUE</h1>
+                <p>JE VAIS ARRIVER PAR-DESSUS !</p>
+                <p>Scroll vers le haut pour partir</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug" id="debug">
+        Section active: ROUGE<br>
+        Z-index rouge: 10<br>
+        Z-index bleu: 5
+    </div>
+
+    <script>
+        const rouge = document.getElementById('rouge');
+        const bleu = document.getElementById('bleu');
+        const debug = document.getElementById('debug');
+        let activeColor = 'rouge';
+
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            if (e.deltaY > 20 && activeColor === 'rouge') {
+                // BLEUE passe au-dessus de ROUGE
+                bleu.style.zIndex = '15';
+                rouge.style.zIndex = '5';
+                activeColor = 'bleu';
+                debug.innerHTML = 'Section active: BLEUE<br>Z-index rouge: 5<br>Z-index bleu: 15<br><strong>🔵 BLEUE est maintenant AU-DESSUS !</strong>';
+                console.log('🔵 BLEUE arrive par-dessus ROUGE');
+            }
+            else if (e.deltaY < -20 && activeColor === 'bleu') {
+                // ROUGE repasse au-dessus de BLEUE
+                rouge.style.zIndex = '15';
+                bleu.style.zIndex = '5';
+                activeColor = 'rouge';
+                debug.innerHTML = 'Section active: ROUGE<br>Z-index rouge: 15<br>Z-index bleu: 5<br><strong>🔴 ROUGE est de retour AU-DESSUS !</strong>';
+                console.log('🔴 ROUGE revient au-dessus de BLEUE');
+            }
+        }, { passive: false });
+
+        console.log('🎯 EFFET PUSH CHARGÉ - ROUGE reste fixe, BLEUE arrive par-dessus');
+    </script>
+</body>
+</html>
