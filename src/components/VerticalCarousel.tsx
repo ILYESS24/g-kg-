@@ -108,13 +108,12 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
         return (
           <div
             key={section.id}
-            className="absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out"
+            className="absolute inset-0 flex items-center justify-center transition-all duration-800 ease-out"
             style={{
               backgroundColor: section.backgroundColor || '#ffffff',
-              transform,
-              zIndex,
-              opacity,
-              filter: isActive ? 'none' : 'blur(2px)',
+              transform: isActive ? 'translateY(0)' : 'translateY(100vh)',
+              zIndex: isActive ? 10 : 1,
+              opacity: isActive ? 1 : 0,
             }}
           >
             {/* Contenu de la section */}
