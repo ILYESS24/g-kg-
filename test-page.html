@@ -325,11 +325,13 @@
     <script>
         let currentSlide = 0;
         const totalSlides = 5;
-        const carouselSections = document.getElementById('carousel-sections');
         const indicators = document.querySelectorAll('.indicator');
         const navUp = document.getElementById('nav-up');
         const navDown = document.getElementById('nav-down');
         const counter = document.getElementById('counter');
+        let isTransitioning = false;
+        let scrollAccumulator = 0;
+        const scrollThreshold = 50; // Seuil plus bas pour une réponse plus rapide
 
         function updateCarousel() {
             const sections = document.querySelectorAll('.section');
@@ -365,18 +367,29 @@
         }
 
         function nextSlide() {
-            if (currentSlide < totalSlides - 1) {
+            if (currentSlide < totalSlides - 1 && !isTransitioning) {
+                isTransitioning = true;
                 currentSlide++;
                 updateCarousel();
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 1000); // Durée de la transition CSS
             }
         }
 
         function prevSlide() {
-            if (currentSlide > 0) {
+            if (currentSlide > 0 && !isTransitioning) {
+                isTransitioning = true;
                 currentSlide--;
                 updateCarousel();
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 1000); // Durée de la transition CSS
             }
         }
+
+        // Initialize
+        updateCarousel();
 
         // Event listeners
         navDown.addEventListener('click', nextSlide);
@@ -385,38 +398,51 @@
         // Indicator clicks
         indicators.forEach((indicator, index) => {
             indicator.addEventListener('click', () => {
-                currentSlide = index;
-                updateCarousel();
+                if (!isTransitioning && currentSlide !== index) {
+                    isTransitioning = true;
+                    currentSlide = index;
+                    updateCarousel();
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 1000);
+                }
             });
         });
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown') {
+                e.preventDefault();
                 nextSlide();
             } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
                 prevSlide();
             }
         });
 
-        // Wheel navigation
-        let isScrolling = false;
+        // Wheel navigation améliorée
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            if (isScrolling) return;
-            isScrolling = true;
+            if (isTransitioning) return;
 
-            if (e.deltaY > 0) {
+            // Accumuler le scroll
+            scrollAccumulator += e.deltaY;
+
+            // Si on dépasse le seuil vers le bas
+            if (scrollAccumulator > scrollThreshold && currentSlide < totalSlides - 1) {
                 nextSlide();
-            } else {
-                prevSlide();
+                scrollAccumulator = 0;
             }
-
-            setTimeout(() => {
-                isScrolling = false;
-            }, 700); // Same duration as CSS transition
+            // Si on dépasse le seuil vers le haut
+            else if (scrollAccumulator < -scrollThreshold && currentSlide > 0) {
+                prevSlide();
+                scrollAccumulator = 0;
+            }
         }, { passive: false });
+
+        // Debug log pour vérifier que le script fonctionne
+        console.log('Carrousel vertical initialisé avec', totalSlides, 'sections');
     </script>
 </body>
 </html>

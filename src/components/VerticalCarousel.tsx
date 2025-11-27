@@ -20,13 +20,14 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
 
   useEffect(() => {
     let scrollAccumulator = 0;
-    const scrollThreshold = 100; // Seuil pour déclencher le changement
+    const scrollThreshold = 50; // Seuil plus bas pour une réponse plus rapide
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
 
       if (isTransitioning) return;
 
+      // Accumuler le scroll
       scrollAccumulator += e.deltaY;
 
       // Si on dépasse le seuil vers le bas
