@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST VISIBILITÉ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            height: calc(100vh - 40px);
+            background: transparent;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            border: 2px solid white;
+        }
+
+        #rouge { background: #ef4444; }
+        #bleu { background: #3b82f6; }
+        #vert { background: #10b981; }
+        #orange { background: #f59e0b; }
+        #violet { background: #8b5cf6; }
+
+        .debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="rouge" class="section">
+            <div>
+                <h1>🔴 ROUGE VISIBLE</h1>
+                <p>JE SUIS LA PREMIÈRE PAGE</p>
+                <p>Scroll vers le bas pour voir les autres</p>
+            </div>
+        </div>
+
+        <div id="bleu" class="section">
+            <div>
+                <h1>🔵 BLEU VISIBLE</h1>
+                <p>JE SUIS LA DEUXIÈME PAGE</p>
+            </div>
+        </div>
+
+        <div id="vert" class="section">
+            <div>
+                <h1>🟢 VERT VISIBLE</h1>
+                <p>JE SUIS LA TROISIÈME PAGE</p>
+            </div>
+        </div>
+
+        <div id="orange" class="section">
+            <div>
+                <h1>🟠 ORANGE VISIBLE</h1>
+                <p>JE SUIS LA QUATRIÈME PAGE</p>
+            </div>
+        </div>
+
+        <div id="violet" class="section">
+            <div>
+                <h1>🟣 VIOLET VISIBLE</h1>
+                <p>JE SUIS LA CINQUIÈME PAGE</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug" id="debug">
+        TOUTES LES PAGES SONT VISIBLES<br>
+        Scroll pour les voir bouger
+    </div>
+
+    <script>
+        const sections = ['rouge', 'bleu', 'vert', 'orange', 'violet'];
+        const debug = document.getElementById('debug');
+        let currentIndex = 0;
+
+        // Positionner toutes les sections sauf la première
+        sections.forEach((color, index) => {
+            if (index > 0) {
+                document.getElementById(color).style.transform = 'translateY(100vh)';
+                document.getElementById(color).style.zIndex = (6 - index).toString();
+            } else {
+                document.getElementById(color).style.zIndex = '10';
+            }
+        });
+
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            if (e.deltaY > 20 && currentIndex < sections.length - 1) {
+                // Avancer
+                const currentSection = document.getElementById(sections[currentIndex]);
+                const nextSection = document.getElementById(sections[currentIndex + 1]);
+
+                currentSection.style.zIndex = '5';
+                nextSection.style.transform = 'translateY(0)';
+                nextSection.style.zIndex = '10';
+
+                currentIndex++;
+                debug.innerHTML = `PAGE ${currentIndex + 1}/5<br>${sections[currentIndex].toUpperCase()} AU-DESSUS`;
+            }
+            else if (e.deltaY < -20 && currentIndex > 0) {
+                // Reculer
+                const currentSection = document.getElementById(sections[currentIndex]);
+                const prevSection = document.getElementById(sections[currentIndex - 1]);
+
+                currentSection.style.transform = 'translateY(100vh)';
+                currentSection.style.zIndex = '5';
+                prevSection.style.zIndex = '10';
+
+                currentIndex--;
+                debug.innerHTML = `PAGE ${currentIndex + 1}/5<br>${sections[currentIndex].toUpperCase()} AU-DESSUS`;
+            }
+        }, { passive: false });
+
+        debug.innerHTML = 'PAGE 1/5<br>ROUGE AU-DESSUS<br>Toutes les pages sont là !';
+        console.log('🎯 TEST VISIBILITÉ - Toutes les 5 pages sont présentes');
+    </script>
+</body>
+</html>

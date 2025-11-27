@@ -34,7 +34,7 @@
             color: white;
             font-size: 2rem;
             font-weight: bold;
-            transition: all 0.5s ease;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         #rouge { background: #ef4444; transform: translateY(0); z-index: 5; }
@@ -126,6 +126,7 @@
         const sections = ['rouge', 'bleu', 'vert', 'orange', 'violet'];
         const debug = document.getElementById('debug');
         let currentIndex = 0;
+        let lastScrollTime = 0;
 
         function updateSections() {
             sections.forEach((color, index) => {
@@ -160,7 +161,10 @@
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            if (e.deltaY > 20 && currentIndex < sections.length - 1) {
+            const now = Date.now();
+            if (now - lastScrollTime < 800) return; // Délai anti-spam de 800ms
+
+            if (e.deltaY > 50 && currentIndex < sections.length - 1) {
                 // EFFET : La section suivante monte pour couvrir l'actuelle
                 const currentSection = document.getElementById(sections[currentIndex]);
                 const nextSection = document.getElementById(sections[currentIndex + 1]);
@@ -190,9 +194,10 @@
                 }
 
                 updateDebug();
+                lastScrollTime = now;
                 console.log(`🎯 ${sections[currentIndex]} vient couvrir ${sections[currentIndex - 1]}`);
             }
-            else if (e.deltaY < -20 && currentIndex > 0) {
+            else if (e.deltaY < -50 && currentIndex > 0) {
                 // EFFET : La section actuelle descend, la précédente remonte
                 const currentSection = document.getElementById(sections[currentIndex]);
                 const prevSection = document.getElementById(sections[currentIndex - 1]);
@@ -215,6 +220,7 @@
                 currentIndex--;
 
                 updateDebug();
+                lastScrollTime = now;
                 console.log(`🎯 ${sections[currentIndex]} redevient visible`);
             }
         }, { passive: false });
