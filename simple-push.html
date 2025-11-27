@@ -35,17 +35,13 @@
             font-size: 2rem;
             font-weight: bold;
             transition: all 0.5s ease;
-            border: 5px solid;
-            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .section.active {
-            border-color: white !important;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        }
-
-        #rouge { background: #ef4444; z-index: 10; }
-        #bleu { background: #3b82f6; z-index: 5; }
+        #rouge { background: #ef4444; transform: translateY(0); z-index: 5; }
+        #bleu { background: #3b82f6; transform: translateY(100vh); z-index: 4; }
+        #vert { background: #10b981; transform: translateY(100vh); z-index: 3; }
+        #orange { background: #f59e0b; transform: translateY(100vh); z-index: 2; }
+        #violet { background: #8b5cf6; transform: translateY(100vh); z-index: 1; }
 
         .debug {
             position: fixed;
@@ -65,11 +61,11 @@
         <div id="rouge" class="section active">
             <div>
                 <h1>🔴 SECTION ROUGE</h1>
-                <p>⭐ JE SUIS ACTUELLEMENT AU-DESSUS</p>
-                <p>🔒 JE NE BOUGE JAMAIS DE PLACE</p>
-                <p>⬇️ Scroll vers le bas pour voir BLEUE arriver</p>
+                <p>🔒 JE RESTE FIXE À translateY(0)</p>
+                <p>JE NE BOUGE JAMAIS !</p>
+                <p>⬇️ Scroll vers le bas → BLEUE va monter me couvrir</p>
                 <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: red; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
-                    Z-INDEX: 10 ⭐
+                    AU-DESSUS ⭐
                 </div>
             </div>
         </div>
@@ -77,11 +73,44 @@
         <div id="bleu" class="section">
             <div>
                 <h1>🔵 SECTION BLEUE</h1>
-                <p>⬇️ JE SUIS EN DESSOUS POUR LE MOMENT</p>
-                <p>🎯 JE VAIS ARRIVER PAR-DESSUS LA ROUGE</p>
-                <p>⬆️ Scroll vers le haut pour me faire partir</p>
+                <p>⬇️ JE SUIS EN BAS À translateY(100vh)</p>
+                <p>🎯 JE VAIS MONTER COUVRIR LA ROUGE</p>
+                <p>⬆️ Scroll vers le haut → je redescends</p>
                 <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: blue; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
-                    Z-INDEX: 5
+                    EN DESSOUS
+                </div>
+            </div>
+        </div>
+
+        <div id="vert" class="section">
+            <div>
+                <h1>🟢 SECTION VERTE</h1>
+                <p>JE VAIS MONTER APRÈS LA BLEUE</p>
+                <p>Continue à scroller !</p>
+                <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: green; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
+                    PRÊTE
+                </div>
+            </div>
+        </div>
+
+        <div id="orange" class="section">
+            <div>
+                <h1>🟠 SECTION ORANGE</h1>
+                <p>JE SUIS LA SUIVANTE !</p>
+                <p>Continue à scroller</p>
+                <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: orange; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
+                    PRÊTE
+                </div>
+            </div>
+        </div>
+
+        <div id="violet" class="section">
+            <div>
+                <h1>🟣 SECTION VIOLETTE</h1>
+                <p>DERNIÈRE SECTION !</p>
+                <p>Scroll vers le haut pour revenir</p>
+                <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: purple; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
+                    FIN
                 </div>
             </div>
         </div>
@@ -94,47 +123,59 @@
     </div>
 
     <script>
-        const rouge = document.getElementById('rouge');
-        const bleu = document.getElementById('bleu');
+        const sections = ['rouge', 'bleu', 'vert', 'orange', 'violet'];
         const debug = document.getElementById('debug');
-        let activeColor = 'rouge';
+        let currentIndex = 0;
+
+        function updateSections() {
+            sections.forEach((color, index) => {
+                const section = document.getElementById(color);
+
+                if (index === currentIndex) {
+                    // Section active - au-dessus
+                    section.style.transform = 'translateY(0)';
+                    section.style.zIndex = '10';
+                    section.classList.add('active');
+                    section.querySelector('.badge').textContent = 'AU-DESSUS ⭐';
+                } else if (index === currentIndex + 1) {
+                    // Section suivante - prête en bas
+                    section.style.transform = 'translateY(100vh)';
+                    section.style.zIndex = '5';
+                    section.classList.remove('active');
+                    section.querySelector('.badge').textContent = 'PRÊTE EN BAS';
+                } else {
+                    // Autres sections - cachées
+                    section.style.transform = 'translateY(100vh)';
+                    section.style.zIndex = '1';
+                    section.classList.remove('active');
+                    section.querySelector('.badge').textContent = 'CACHÉE';
+                }
+            });
+
+            const colorNames = { rouge: '🔴 ROUGE', bleu: '🔵 BLEU', vert: '🟢 VERT', orange: '🟠 ORANGE', violet: '🟣 VIOLET' };
+            debug.innerHTML = `Slide actif: ${currentIndex + 1}/5<br>Couleur: ${colorNames[sections[currentIndex]]}<br>Effet: Slide depuis le bas`;
+        }
 
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            if (e.deltaY > 20 && activeColor === 'rouge') {
-                // BLEUE passe au-dessus de ROUGE
-                bleu.style.zIndex = '15';
-                rouge.style.zIndex = '5';
-                bleu.classList.add('active');
-                rouge.classList.remove('active');
-                activeColor = 'bleu';
-
-                // Mettre à jour les indicateurs
-                bleu.querySelector('.badge').textContent = 'Z-INDEX: 15 ⭐';
-                rouge.querySelector('.badge').textContent = 'Z-INDEX: 5';
-
-                debug.innerHTML = '🎯 BLEUE est maintenant AU-DESSUS !<br>Z-index rouge: 5<br>Z-index bleu: 15<br><strong>La ROUGE reste fixe en dessous !</strong>';
-                console.log('🔵 BLEUE arrive par-dessus ROUGE - ROUGE reste fixe');
+            if (e.deltaY > 20 && currentIndex < sections.length - 1) {
+                // Avancer vers la section suivante
+                currentIndex++;
+                updateSections();
+                console.log(`➡️ Avancé vers ${sections[currentIndex]}`);
             }
-            else if (e.deltaY < -20 && activeColor === 'bleu') {
-                // ROUGE repasse au-dessus de BLEUE
-                rouge.style.zIndex = '15';
-                bleu.style.zIndex = '5';
-                rouge.classList.add('active');
-                bleu.classList.remove('active');
-                activeColor = 'rouge';
-
-                // Mettre à jour les indicateurs
-                rouge.querySelector('.badge').textContent = 'Z-INDEX: 15 ⭐';
-                bleu.querySelector('.badge').textContent = 'Z-INDEX: 5';
-
-                debug.innerHTML = '🎯 ROUGE est de retour AU-DESSUS !<br>Z-index rouge: 15<br>Z-index bleu: 5<br><strong>La BLEUE reste en dessous !</strong>';
-                console.log('🔴 ROUGE revient au-dessus de BLEUE - BLEUE reste fixe');
+            else if (e.deltaY < -20 && currentIndex > 0) {
+                // Reculer vers la section précédente
+                currentIndex--;
+                updateSections();
+                console.log(`⬅️ Reculé vers ${sections[currentIndex]}`);
             }
         }, { passive: false });
 
-        console.log('🎯 EFFET PUSH CHARGÉ - ROUGE reste fixe, BLEUE arrive par-dessus');
+        // Initialisation
+        updateSections();
+        console.log('🎯 CARROUSEL CHARGÉ - Toutes les sections sont prêtes !');
     </script>
 </body>
 </html>
