@@ -34,7 +34,14 @@
             color: white;
             font-size: 2rem;
             font-weight: bold;
-            transition: z-index 0.3s ease;
+            transition: all 0.5s ease;
+            border: 5px solid;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .section.active {
+            border-color: white !important;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
         }
 
         #rouge { background: #ef4444; z-index: 10; }
@@ -55,19 +62,27 @@
 </head>
 <body>
     <div class="container">
-        <div id="rouge" class="section">
+        <div id="rouge" class="section active">
             <div>
                 <h1>🔴 SECTION ROUGE</h1>
-                <p>JE RESTE FIXE TOUJOURS !</p>
-                <p>Scroll vers le bas pour voir BLEUE arriver</p>
+                <p>⭐ JE SUIS ACTUELLEMENT AU-DESSUS</p>
+                <p>🔒 JE NE BOUGE JAMAIS DE PLACE</p>
+                <p>⬇️ Scroll vers le bas pour voir BLEUE arriver</p>
+                <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: red; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
+                    Z-INDEX: 10 ⭐
+                </div>
             </div>
         </div>
 
         <div id="bleu" class="section">
             <div>
                 <h1>🔵 SECTION BLEUE</h1>
-                <p>JE VAIS ARRIVER PAR-DESSUS !</p>
-                <p>Scroll vers le haut pour partir</p>
+                <p>⬇️ JE SUIS EN DESSOUS POUR LE MOMENT</p>
+                <p>🎯 JE VAIS ARRIVER PAR-DESSUS LA ROUGE</p>
+                <p>⬆️ Scroll vers le haut pour me faire partir</p>
+                <div class="badge" style="position: absolute; top: 10px; right: 10px; background: white; color: blue; padding: 5px 10px; border-radius: 20px; font-size: 14px;">
+                    Z-INDEX: 5
+                </div>
             </div>
         </div>
     </div>
@@ -91,17 +106,31 @@
                 // BLEUE passe au-dessus de ROUGE
                 bleu.style.zIndex = '15';
                 rouge.style.zIndex = '5';
+                bleu.classList.add('active');
+                rouge.classList.remove('active');
                 activeColor = 'bleu';
-                debug.innerHTML = 'Section active: BLEUE<br>Z-index rouge: 5<br>Z-index bleu: 15<br><strong>🔵 BLEUE est maintenant AU-DESSUS !</strong>';
-                console.log('🔵 BLEUE arrive par-dessus ROUGE');
+
+                // Mettre à jour les indicateurs
+                bleu.querySelector('.badge').textContent = 'Z-INDEX: 15 ⭐';
+                rouge.querySelector('.badge').textContent = 'Z-INDEX: 5';
+
+                debug.innerHTML = '🎯 BLEUE est maintenant AU-DESSUS !<br>Z-index rouge: 5<br>Z-index bleu: 15<br><strong>La ROUGE reste fixe en dessous !</strong>';
+                console.log('🔵 BLEUE arrive par-dessus ROUGE - ROUGE reste fixe');
             }
             else if (e.deltaY < -20 && activeColor === 'bleu') {
                 // ROUGE repasse au-dessus de BLEUE
                 rouge.style.zIndex = '15';
                 bleu.style.zIndex = '5';
+                rouge.classList.add('active');
+                bleu.classList.remove('active');
                 activeColor = 'rouge';
-                debug.innerHTML = 'Section active: ROUGE<br>Z-index rouge: 15<br>Z-index bleu: 5<br><strong>🔴 ROUGE est de retour AU-DESSUS !</strong>';
-                console.log('🔴 ROUGE revient au-dessus de BLEUE');
+
+                // Mettre à jour les indicateurs
+                rouge.querySelector('.badge').textContent = 'Z-INDEX: 15 ⭐';
+                bleu.querySelector('.badge').textContent = 'Z-INDEX: 5';
+
+                debug.innerHTML = '🎯 ROUGE est de retour AU-DESSUS !<br>Z-index rouge: 15<br>Z-index bleu: 5<br><strong>La BLEUE reste en dessous !</strong>';
+                console.log('🔴 ROUGE revient au-dessus de BLEUE - BLEUE reste fixe');
             }
         }, { passive: false });
 
