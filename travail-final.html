@@ -98,45 +98,45 @@
         <div id="rouge" class="section active">
             <div class="content">
                 <h1>🔴 ROUGE</h1>
-                <p>SECTION 1 - Je suis au milieu</p>
-                <p>⬇️ Scroll BAS → BLEU monte d'en bas</p>
-                <p>⬆️ Scroll HAUT → Rien (je suis la première)</p>
+                <p>JE NE BOUGE JAMAIS !</p>
+                <p>Je reste fixe à ma place</p>
+                <p>⬇️ Scroll → BLEU vient me couvrir</p>
             </div>
         </div>
 
         <div id="bleu" class="section">
             <div class="content">
                 <h1>🔵 BLEU</h1>
-                <p>SECTION 2 - J'arrive d'en bas !</p>
-                <p>⬇️ Scroll BAS → VERT arrive d'en bas</p>
-                <p>⬆️ Scroll HAUT → ROUGE redescend d'en haut</p>
+                <p>JE VAIS ARRIVER D'EN BAS</p>
+                <p>Pour couvrir la rouge</p>
+                <p>⬆️ Scroll → Je m'en vais</p>
             </div>
         </div>
 
         <div id="vert" class="section">
             <div class="content">
                 <h1>🟢 VERT</h1>
-                <p>SECTION 3 - Je viens d'en bas aussi !</p>
-                <p>⬇️ Scroll BAS → ORANGE arrive</p>
-                <p>⬆️ Scroll HAUT → BLEU redescend</p>
+                <p>JE VAIS ARRIVER APRÈS BLEU</p>
+                <p>Toujours d'en bas</p>
+                <p>Pour couvrir la bleue</p>
             </div>
         </div>
 
         <div id="orange" class="section">
             <div class="content">
                 <h1>🟠 ORANGE</h1>
-                <p>SECTION 4 - Toujours d'en bas !</p>
-                <p>⬇️ Scroll BAS → VIOLET arrive</p>
-                <p>⬆️ Scroll HAUT → VERT redescend</p>
+                <p>JE VAIS ARRIVER APRÈS VERT</p>
+                <p>D'en bas comme les autres</p>
+                <p>Pour couvrir la verte</p>
             </div>
         </div>
 
         <div id="violet" class="section">
             <div class="content">
                 <h1>🟣 VIOLET</h1>
-                <p>SECTION 5 - Dernière, d'en bas !</p>
-                <p>⬇️ Scroll BAS → Rien (dernière)</p>
-                <p>⬆️ Scroll HAUT → ORANGE redescend</p>
+                <p>JE SUIS LA DERNIÈRE</p>
+                <p>J'arrive d'en bas</p>
+                <p>Pour couvrir l'orange</p>
             </div>
         </div>
     </div>
@@ -156,23 +156,28 @@
         function updateSections() {
             sections.forEach((color, index) => {
                 const section = document.getElementById(color);
-                const relativePosition = index - currentIndex;
 
-                // Chaque section se positionne par rapport à la section actuelle
-                section.style.transform = `translateY(${relativePosition * 100}vh)`;
+                // EFFET PUSH : Toutes les sections restent à translateY(0)
+                // Seule la section active a le z-index le plus élevé
+                section.style.transform = 'translateY(0)';
 
-                // La section actuelle est au-dessus
                 if (index === currentIndex) {
                     section.classList.add('active');
                     section.style.zIndex = '10';
+                } else if (index === currentIndex + 1) {
+                    // La section suivante attend en bas
+                    section.classList.remove('active');
+                    section.style.zIndex = '5';
+                    section.style.transform = 'translateY(100vh)';
                 } else {
                     section.classList.remove('active');
-                    section.style.zIndex = Math.max(1, 10 - Math.abs(relativePosition));
+                    section.style.zIndex = '1';
+                    section.style.transform = 'translateY(100vh)';
                 }
             });
 
             const colors = ['🔴 ROUGE', '🔵 BLEU', '🟢 VERT', '🟠 ORANGE', '🟣 VIOLET'];
-            debug.innerHTML = `CARROUSEL VERTICAL<br>Section ${currentIndex + 1}/5<br>${colors[currentIndex]}<br>⬆️⬇️ Scroll pour changer`;
+            debug.innerHTML = `EFFET PUSH<br>Section ${currentIndex + 1}/5<br>${colors[currentIndex]} reste fixe<br>⬇️ Scroll = suivante arrive d'en bas`;
         }
 
         document.addEventListener('wheel', (e) => {
@@ -182,29 +187,60 @@
 
             const deltaY = e.deltaY;
 
-            if (deltaY > 100 && currentIndex < sections.length - 1) {
-                // Scroll vers le bas
+            if (deltaY > 50 && currentIndex < sections.length - 1) {
+                // EFFET PUSH : La section suivante vient couvrir l'actuelle
                 isTransitioning = true;
+
+                const currentSection = document.getElementById(sections[currentIndex]);
+                const nextSection = document.getElementById(sections[currentIndex + 1]);
+
+                // La section actuelle reste fixe, perd son z-index
+                currentSection.style.zIndex = '5';
+
+                // La section suivante monte d'en bas pour couvrir
+                nextSection.style.transform = 'translateY(0)';
+                nextSection.style.zIndex = '10';
+                nextSection.classList.add('active');
+
                 currentIndex++;
-                updateSections();
+
+                // Préparer la prochaine section
+                if (currentIndex < sections.length - 1) {
+                    const futureSection = document.getElementById(sections[currentIndex + 1]);
+                    futureSection.style.transform = 'translateY(100vh)';
+                }
 
                 setTimeout(() => {
+                    updateSections();
                     isTransitioning = false;
                 }, 800);
 
-                console.log('⬇️ Nouvelle section:', sections[currentIndex]);
+                console.log('🎯', sections[currentIndex], 'vient couvrir l\'ancienne');
 
-            } else if (deltaY < -100 && currentIndex > 0) {
-                // Scroll vers le haut
+            } else if (deltaY < -50 && currentIndex > 0) {
+                // EFFET PUSH INVERSE : La section actuelle descend, la précédente remonte
                 isTransitioning = true;
+
+                const currentSection = document.getElementById(sections[currentIndex]);
+                const prevSection = document.getElementById(sections[currentIndex - 1]);
+
+                // La section actuelle descend
+                currentSection.style.transform = 'translateY(100vh)';
+                currentSection.style.zIndex = '5';
+                currentSection.classList.remove('active');
+
+                // La section précédente devient active
+                prevSection.style.zIndex = '10';
+                prevSection.classList.add('active');
+
                 currentIndex--;
-                updateSections();
 
                 setTimeout(() => {
+                    updateSections();
                     isTransitioning = false;
                 }, 800);
 
-                console.log('⬆️ Nouvelle section:', sections[currentIndex]);
+                console.log('⬆️ Retour à', sections[currentIndex]);
             }
         }, { passive: false });
 
