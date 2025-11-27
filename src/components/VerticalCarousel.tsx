@@ -16,6 +16,7 @@ interface VerticalCarouselProps {
 export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [direction, setDirection] = useState<'up' | 'down'>('down');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
       // Si on dépasse le seuil vers le bas
       if (scrollAccumulator > scrollThreshold && currentIndex < sections.length - 1) {
         setIsTransitioning(true);
+        setDirection('down');
         setCurrentIndex(prev => prev + 1);
         scrollAccumulator = 0;
 
@@ -41,6 +43,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
       // Si on dépasse le seuil vers le haut
       else if (scrollAccumulator < -scrollThreshold && currentIndex > 0) {
         setIsTransitioning(true);
+        setDirection('up');
         setCurrentIndex(prev => prev - 1);
         scrollAccumulator = 0;
 
@@ -79,30 +82,18 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
         const isPrev = index === currentIndex - 1;
         const isNext = index === currentIndex + 1;
 
-        let transform = '';
-        let zIndex = 0;
-        let opacity = 0;
+        let transform = 'translateY(100vh)';
+        let zIndex = 1;
 
         if (isActive) {
-          transform = 'translateY(0) scale(1)';
-          zIndex = 10;
-          opacity = 1;
-        } else if (isPrev) {
-          transform = 'translateY(-20vh) scale(0.95)';
-          zIndex = 5;
-          opacity = 0.7;
+          transform = 'translateY(0)';
+          zIndex = 15;
         } else if (isNext) {
-          transform = 'translateY(20vh) scale(0.95)';
+          transform = direction === 'down' ? 'translateY(100vh)' : 'translateY(-100vh)';
+          zIndex = 10;
+        } else if (isPrev) {
+          transform = direction === 'up' ? 'translateY(-100vh)' : 'translateY(100vh)';
           zIndex = 5;
-          opacity = 0.7;
-        } else if (index < currentIndex) {
-          transform = `translateY(-${(currentIndex - index) * 40}vh) scale(${1 - (currentIndex - index) * 0.1})`;
-          zIndex = Math.max(1, 10 - (currentIndex - index));
-          opacity = Math.max(0.3, 1 - (currentIndex - index) * 0.3);
-        } else {
-          transform = `translateY(${(index - currentIndex) * 40}vh) scale(${1 - (index - currentIndex) * 0.1})`;
-          zIndex = Math.max(1, 10 - (index - currentIndex));
-          opacity = Math.max(0.3, 1 - (index - currentIndex) * 0.3);
         }
 
         return (

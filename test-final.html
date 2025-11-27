@@ -35,18 +35,26 @@
             font-size: 3rem;
             font-weight: bold;
             transition: transform 0.8s ease-out;
-            opacity: 0;
         }
 
         .section.active {
-            opacity: 1;
             transform: translateY(0);
             z-index: 10;
         }
 
-        .section.hidden {
-            opacity: 0;
+        .section.next {
             transform: translateY(100vh);
+            z-index: 5;
+        }
+
+        .section.prev {
+            transform: translateY(-100vh);
+            z-index: 5;
+        }
+
+        .section.hidden {
+            transform: translateY(100vh);
+            z-index: 1;
         }
 
         #section1 { background: #ef4444; } /* ROUGE */
@@ -59,7 +67,7 @@
 <body>
     <div class="container">
         <div id="section1" class="section active">SECTION 1 - ROUGE</div>
-        <div id="section2" class="section hidden">SECTION 2 - BLEU</div>
+        <div id="section2" class="section next">SECTION 2 - BLEU</div>
         <div id="section3" class="section hidden">SECTION 3 - VERT</div>
         <div id="section4" class="section hidden">SECTION 4 - ORANGE</div>
         <div id="section5" class="section hidden">SECTION 5 - VIOLET</div>
@@ -81,33 +89,66 @@
             const sections = document.querySelectorAll('.section');
 
             sections.forEach((section, index) => {
+                section.classList.remove('active', 'next', 'prev', 'hidden');
+
                 if (index === currentSlide) {
-                    section.classList.remove('hidden');
                     section.classList.add('active');
+                } else if (index === currentSlide + 1) {
+                    section.classList.add('next');
+                } else if (index === currentSlide - 1) {
+                    section.classList.add('prev');
                 } else {
-                    section.classList.remove('active');
                     section.classList.add('hidden');
                 }
             });
 
-            console.log('📄 Slide affichée:', currentSlide + 1);
+            console.log('📄 Slide affichée:', currentSlide + 1, '- Next:', currentSlide + 2, '- Prev:', currentSlide);
         }
 
         function nextSlide() {
             if (currentSlide < totalSlides - 1 && !isTransitioning) {
                 isTransitioning = true;
                 currentSlide++;
-                updateSlides();
-                setTimeout(() => isTransitioning = false, 1000);
+
+                // Animation : la nouvelle section vient du bas
+                const newSection = document.getElementById('section' + currentSlide);
+                const oldSection = document.getElementById('section' + (currentSlide - 1));
+
+                newSection.style.transform = 'translateY(0)';
+                newSection.style.zIndex = '15';
+
+                setTimeout(() => {
+                    if (oldSection) {
+                        oldSection.style.transform = 'translateY(-100vh)';
+                        oldSection.style.zIndex = '5';
+                    }
+                    updateSlides();
+                    isTransitioning = false;
+                }, 800);
             }
         }
 
         function prevSlide() {
             if (currentSlide > 0 && !isTransitioning) {
                 isTransitioning = true;
+
+                // Animation : la section précédente revient du haut
+                const oldSection = document.getElementById('section' + currentSlide);
+                const newSection = document.getElementById('section' + (currentSlide - 1));
+
+                newSection.style.transform = 'translateY(0)';
+                newSection.style.zIndex = '15';
+
                 currentSlide--;
-                updateSlides();
-                setTimeout(() => isTransitioning = false, 1000);
+
+                setTimeout(() => {
+                    if (oldSection) {
+                        oldSection.style.transform = 'translateY(100vh)';
+                        oldSection.style.zIndex = '5';
+                    }
+                    updateSlides();
+                    isTransitioning = false;
+                }, 800);
             }
         }
 
