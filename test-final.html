@@ -34,7 +34,7 @@
             color: white;
             font-size: 3rem;
             font-weight: bold;
-            transition: transform 0.8s ease-out;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .section.active {
@@ -78,12 +78,15 @@
         const totalSlides = 5;
         let isTransitioning = false;
         let scrollAccumulator = 0;
-        const scrollThreshold = 50;
+        const scrollThreshold = 30;
+        let lastScrollTime = 0;
+        let transitionProgress = 0; // Progression de la transition (0-1)
+        const transitionSpeed = 0.02; // Vitesse de révélation progressive
 
         console.log('🚀 CARROUSEL FINAL CHARGÉ');
 
         // Initialisation
-        updateSlides();
+        resetSlidePositions();
 
         function updateSlides() {
             const sections = document.querySelectorAll('.section');
@@ -106,68 +109,110 @@
         }
 
         function nextSlide() {
+            // Pour la compatibilité avec les touches, on garde un nextSlide instantané
             if (currentSlide < totalSlides - 1 && !isTransitioning) {
                 isTransitioning = true;
                 currentSlide++;
-
-                // Animation : la nouvelle section vient du bas
-                const newSection = document.getElementById('section' + currentSlide);
-                const oldSection = document.getElementById('section' + (currentSlide - 1));
-
-                newSection.style.transform = 'translateY(0)';
-                newSection.style.zIndex = '15';
-
-                setTimeout(() => {
-                    if (oldSection) {
-                        oldSection.style.transform = 'translateY(-100vh)';
-                        oldSection.style.zIndex = '5';
-                    }
-                    updateSlides();
-                    isTransitioning = false;
-                }, 800);
+                scrollAccumulator = 0;
+                transitionProgress = 0;
+                updateSlides();
+                setTimeout(() => isTransitioning = false, 600);
             }
         }
 
         function prevSlide() {
+            // Pour la compatibilité avec les touches, on garde un prevSlide instantané
             if (currentSlide > 0 && !isTransitioning) {
                 isTransitioning = true;
-
-                // Animation : la section précédente revient du haut
-                const oldSection = document.getElementById('section' + currentSlide);
-                const newSection = document.getElementById('section' + (currentSlide - 1));
-
-                newSection.style.transform = 'translateY(0)';
-                newSection.style.zIndex = '15';
-
                 currentSlide--;
-
-                setTimeout(() => {
-                    if (oldSection) {
-                        oldSection.style.transform = 'translateY(100vh)';
-                        oldSection.style.zIndex = '5';
-                    }
-                    updateSlides();
-                    isTransitioning = false;
-                }, 800);
+                scrollAccumulator = 0;
+                transitionProgress = 0;
+                updateSlides();
+                setTimeout(() => isTransitioning = false, 600);
             }
         }
 
-        // SCROLL
+        // SCROLL progressif - révélation petit à petit
         document.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            if (isTransitioning) return;
+            // Accumuler le scroll pour un mouvement fluide
+            scrollAccumulator += e.deltaY * 0.3; // Sensibilité douce
 
-            scrollAccumulator += e.deltaY;
+            // Limiter l'accumulateur pour éviter les valeurs trop grandes
+            scrollAccumulator = Math.max(-200, Math.min(200, scrollAccumulator));
 
+            // Calculer la progression de la transition
             if (scrollAccumulator > scrollThreshold && currentSlide < totalSlides - 1) {
-                nextSlide();
-                scrollAccumulator = 0;
+                // Transition vers la slide suivante
+                const progress = Math.min(1, (scrollAccumulator - scrollThreshold) / 150);
+                updateSlidePositions(progress, 'next');
             } else if (scrollAccumulator < -scrollThreshold && currentSlide > 0) {
-                prevSlide();
+                // Transition vers la slide précédente
+                const progress = Math.min(1, (-scrollAccumulator - scrollThreshold) / 150);
+                updateSlidePositions(progress, 'prev');
+            } else if (Math.abs(scrollAccumulator) <= scrollThreshold) {
+                // Reset si on revient dans la zone neutre
+                resetSlidePositions();
+            }
+
+            // Changer de slide si la transition est complète
+            if (scrollAccumulator > scrollThreshold + 150 && currentSlide < totalSlides - 1) {
+                currentSlide++;
                 scrollAccumulator = 0;
+                updateSlides();
+                console.log('Slide changed to:', currentSlide);
+            } else if (scrollAccumulator < -scrollThreshold - 150 && currentSlide > 0) {
+                currentSlide--;
+                scrollAccumulator = 0;
+                updateSlides();
+                console.log('Slide changed to:', currentSlide);
             }
         }, { passive: false });
+
+        function updateSlidePositions(progress, direction) {
+            const sections = document.querySelectorAll('.section');
+
+            sections.forEach((section, index) => {
+                if (direction === 'next' && index === currentSlide) {
+                    // Slide actuelle : se déplace vers le haut
+                    const translateY = -progress * 100;
+                    section.style.transform = `translateY(${translateY}vh)`;
+                    section.style.zIndex = '10';
+                } else if (direction === 'next' && index === currentSlide + 1) {
+                    // Slide suivante : arrive depuis le bas
+                    const translateY = (1 - progress) * 100;
+                    section.style.transform = `translateY(${translateY}vh)`;
+                    section.style.zIndex = '15';
+                } else if (direction === 'prev' && index === currentSlide) {
+                    // Slide actuelle : se déplace vers le bas
+                    const translateY = progress * 100;
+                    section.style.transform = `translateY(${translateY}vh)`;
+                    section.style.zIndex = '10';
+                } else if (direction === 'prev' && index === currentSlide - 1) {
+                    // Slide précédente : arrive depuis le haut
+                    const translateY = -(1 - progress) * 100;
+                    section.style.transform = `translateY(${translateY}vh)`;
+                    section.style.zIndex = '15';
+                }
+            });
+        }
+
+        function resetSlidePositions() {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach((section, index) => {
+                if (index === currentSlide) {
+                    section.style.transform = 'translateY(0)';
+                    section.style.zIndex = '10';
+                } else if (index === currentSlide + 1) {
+                    section.style.transform = 'translateY(100vh)';
+                    section.style.zIndex = '5';
+                } else {
+                    section.style.transform = 'translateY(100vh)';
+                    section.style.zIndex = '1';
+                }
+            });
+        }
 
         // CLAVIER
         document.addEventListener('keydown', (e) => {

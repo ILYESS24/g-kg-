@@ -21,7 +21,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
 
   useEffect(() => {
     let scrollAccumulator = 0;
-    const scrollThreshold = 50; // Seuil plus bas pour une réponse plus rapide
+    const scrollThreshold = 30; // Seuil encore plus bas pour une réponse ultra-rapide
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -38,7 +38,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
         setCurrentIndex(prev => prev + 1);
         scrollAccumulator = 0;
 
-        setTimeout(() => setIsTransitioning(false), 1000);
+        setTimeout(() => setIsTransitioning(false), 800);
       }
       // Si on dépasse le seuil vers le haut
       else if (scrollAccumulator < -scrollThreshold && currentIndex > 0) {
@@ -47,7 +47,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
         setCurrentIndex(prev => prev - 1);
         scrollAccumulator = 0;
 
-        setTimeout(() => setIsTransitioning(false), 1000);
+        setTimeout(() => setIsTransitioning(false), 800);
       }
     };
 
@@ -57,11 +57,11 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
       if (e.key === 'ArrowDown' && currentIndex < sections.length - 1) {
         setIsTransitioning(true);
         setCurrentIndex(prev => prev + 1);
-        setTimeout(() => setIsTransitioning(false), 1000);
+        setTimeout(() => setIsTransitioning(false), 800);
       } else if (e.key === 'ArrowUp' && currentIndex > 0) {
         setIsTransitioning(true);
         setCurrentIndex(prev => prev - 1);
-        setTimeout(() => setIsTransitioning(false), 1000);
+        setTimeout(() => setIsTransitioning(false), 800);
       }
     };
 
@@ -99,7 +99,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
         return (
           <div
             key={section.id}
-            className="absolute inset-0 flex items-center justify-center transition-all duration-800 ease-out"
+            className="absolute inset-0 flex items-center justify-center transition-all duration-600 ease-out"
             style={{
               backgroundColor: section.backgroundColor || '#ffffff',
               transform: isActive ? 'translateY(0)' : 'translateY(100vh)',
@@ -126,7 +126,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
                     if (!isTransitioning) {
                       setIsTransitioning(true);
                       setCurrentIndex(sectionIndex);
-                      setTimeout(() => setIsTransitioning(false), 1000);
+                      setTimeout(() => setIsTransitioning(false), 800);
                     }
                   }}
                   className={`block w-3 h-3 rounded-full mb-2 transition-all duration-300 ${
@@ -149,7 +149,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
             if (!isTransitioning) {
               setIsTransitioning(true);
               setCurrentIndex(prev => prev - 1);
-              setTimeout(() => setIsTransitioning(false), 1000);
+              setTimeout(() => setIsTransitioning(false), 800);
             }
           }}
           className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-20"
@@ -167,7 +167,7 @@ export default function VerticalCarousel({ sections }: VerticalCarouselProps) {
             if (!isTransitioning) {
               setIsTransitioning(true);
               setCurrentIndex(prev => prev + 1);
-              setTimeout(() => setIsTransitioning(false), 1000);
+              setTimeout(() => setIsTransitioning(false), 800);
             }
           }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-300 z-20"
