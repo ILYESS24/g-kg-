@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Blanche avec Bordures</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            height: 100vh;
+            padding: 40px;
+        }
+
+        .page-container {
+            background: white;
+            height: calc(100vh - 80px);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            text-align: center;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="content">
+            <h1>Page Blanche avec Bordures</h1>
+            <p>Bordures noires épaisses et coins très arrondis autour de toute la page.</p>
+        </div>
+    </div>
+</body>
+</html>
