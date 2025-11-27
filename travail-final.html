@@ -43,29 +43,25 @@
             z-index: 10;
         }
 
+        /* Toutes les sections commencent empilées */
         #rouge {
             background: #ef4444;
-            transform: translateY(0);
         }
 
         #bleu {
             background: #3b82f6;
-            transform: translateY(100vh);
         }
 
         #vert {
             background: #10b981;
-            transform: translateY(200vh);
         }
 
         #orange {
             background: #f59e0b;
-            transform: translateY(300vh);
         }
 
         #violet {
             background: #8b5cf6;
-            transform: translateY(400vh);
         }
 
         .content {
@@ -102,37 +98,45 @@
         <div id="rouge" class="section active">
             <div class="content">
                 <h1>🔴 ROUGE</h1>
-                <p>SECTION 1 - Je suis visible</p>
-                <p>Scroll vers le bas pour voir BLEU</p>
+                <p>SECTION 1 - Je suis au milieu</p>
+                <p>⬇️ Scroll BAS → BLEU monte d'en bas</p>
+                <p>⬆️ Scroll HAUT → Rien (je suis la première)</p>
             </div>
         </div>
 
         <div id="bleu" class="section">
             <div class="content">
                 <h1>🔵 BLEU</h1>
-                <p>SECTION 2 - Je monte couvrir le rouge</p>
-                <p>Scroll vers le haut pour revenir</p>
+                <p>SECTION 2 - J'arrive d'en bas !</p>
+                <p>⬇️ Scroll BAS → VERT arrive d'en bas</p>
+                <p>⬆️ Scroll HAUT → ROUGE redescend d'en haut</p>
             </div>
         </div>
 
         <div id="vert" class="section">
             <div class="content">
                 <h1>🟢 VERT</h1>
-                <p>SECTION 3 - Après le bleu</p>
+                <p>SECTION 3 - Je viens d'en bas aussi !</p>
+                <p>⬇️ Scroll BAS → ORANGE arrive</p>
+                <p>⬆️ Scroll HAUT → BLEU redescend</p>
             </div>
         </div>
 
         <div id="orange" class="section">
             <div class="content">
                 <h1>🟠 ORANGE</h1>
-                <p>SECTION 4 - Continue</p>
+                <p>SECTION 4 - Toujours d'en bas !</p>
+                <p>⬇️ Scroll BAS → VIOLET arrive</p>
+                <p>⬆️ Scroll HAUT → VERT redescend</p>
             </div>
         </div>
 
         <div id="violet" class="section">
             <div class="content">
                 <h1>🟣 VIOLET</h1>
-                <p>SECTION 5 - Dernière</p>
+                <p>SECTION 5 - Dernière, d'en bas !</p>
+                <p>⬇️ Scroll BAS → Rien (dernière)</p>
+                <p>⬆️ Scroll HAUT → ORANGE redescend</p>
             </div>
         </div>
     </div>
@@ -154,19 +158,21 @@
                 const section = document.getElementById(color);
                 const relativePosition = index - currentIndex;
 
+                // Chaque section se positionne par rapport à la section actuelle
                 section.style.transform = `translateY(${relativePosition * 100}vh)`;
 
+                // La section actuelle est au-dessus
                 if (index === currentIndex) {
                     section.classList.add('active');
                     section.style.zIndex = '10';
                 } else {
                     section.classList.remove('active');
-                    section.style.zIndex = '1';
+                    section.style.zIndex = Math.max(1, 10 - Math.abs(relativePosition));
                 }
             });
 
             const colors = ['🔴 ROUGE', '🔵 BLEU', '🟢 VERT', '🟠 ORANGE', '🟣 VIOLET'];
-            debug.innerHTML = `CARROUSEL VERTICAL<br>Section ${currentIndex + 1}/5<br>${colors[currentIndex]}<br>Scroll pour changer`;
+            debug.innerHTML = `CARROUSEL VERTICAL<br>Section ${currentIndex + 1}/5<br>${colors[currentIndex]}<br>⬆️⬇️ Scroll pour changer`;
         }
 
         document.addEventListener('wheel', (e) => {
