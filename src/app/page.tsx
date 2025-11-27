@@ -2,21 +2,21 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
-      padding: '40px',
+      backgroundColor: '#6b7280', // Gris moyen
+      padding: '20px',
       boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
         backgroundColor: 'white',
-        borderRadius: '32px',
+        borderRadius: '24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 'calc(100vh - 80px)'
+        minHeight: 'calc(100vh - 40px)'
       }}>
-        {/* Page complètement vide avec bordures épaisses noires autour */}
+        {/* Page vide avec bordures grises moins épaisses */}
       </div>
     </div>
   );
